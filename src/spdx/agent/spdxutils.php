@@ -5,15 +5,15 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-namespace Fossology\SpdxTwo;
+namespace Fossology\Spdx;
 
 use Fossology\Lib\Data\LicenseRef;
 
 /**
- * @class SpdxTwoUtils
+ * @class SpdxUtils
  * @brief Utilities for SPDX2
  */
-class SpdxTwoUtils
+class SpdxUtils
 {
   /**
    * @brief For a given set of arguments assign $args[$key1] and $args[$key2]
@@ -84,7 +84,7 @@ class SpdxTwoUtils
   {
     return array_map(function ($license)
     {
-      return SpdxTwoUtils::addPrefixOnDemand($license);
+      return SpdxUtils::addPrefixOnDemand($license);
     },$licenses);
   }
 

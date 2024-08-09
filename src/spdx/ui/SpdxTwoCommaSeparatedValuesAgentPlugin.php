@@ -1,28 +1,26 @@
 <?php
 /*
- SPDX-FileCopyrightText: © 2015 Siemens AG
+ SPDX-FileCopyrightText: © 2021 Orange
+ Author: Piotr Pszczola <piotr.pszczola@orange.com>
 
  SPDX-License-Identifier: GPL-2.0-only
 */
-/**
- * @dir
- * @brief UI for SPDX2 agent
- */
-namespace Fossology\SpdxTwo\UI;
+
+namespace Fossology\Spdx\UI;
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
 /**
- * @class SpdxTwoAgentPlugin
- * @brief Generate SPDX2 report for multiple uploads
+ * @class SpdxCommaSeparatedValuesAgentPlugin
+ * @brief Add multiple uploads to CSV reports including SPDX identifiers
  */
-class SpdxTwoAgentPlugin extends AgentPlugin
+class SpdxTwoCommaSeparatedValuesAgentPlugin extends AgentPlugin
 {
   public function __construct()
   {
-    $this->Name = "agent_spdx2";
-    $this->Title =  _("SPDX2 generation");
-    $this->AgentName = "spdx2";
+    $this->Name = "agent_spdx2csv";
+    $this->Title =  _("Export CSV report (SPDX)");
+    $this->AgentName = "spdx2csv";
 
     parent::__construct();
   }
@@ -50,4 +48,4 @@ class SpdxTwoAgentPlugin extends AgentPlugin
   }
 }
 
-register_plugin(new SpdxTwoAgentPlugin());
+register_plugin(new SpdxTwoCommaSeparatedValuesAgentPlugin());

@@ -37,10 +37,10 @@
  */
 
 /**
- * @namespace Fossology::SpdxTwo
+ * @namespace Fossology::Spdx
  * @brief Namespace used by SPDX2 agent
  */
-namespace Fossology\SpdxTwo;
+namespace Fossology\Spdx;
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
@@ -63,16 +63,16 @@ use Fossology\Lib\Report\ReportUtils;
 use Fossology\Lib\Util\StringOperation;
 use Twig\Environment;
 
-include_once(__DIR__ . "/spdx2utils.php");
+include_once(__DIR__ . "/spdxutils.php");
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/services.php");
 
 /**
- * @class SpdxTwoAgent
+ * @class SpdxAgent
  * @brief SPDX2 agent
  */
-class SpdxTwoAgent extends Agent
+class SpdxAgent extends Agent
 {
 
   const OUTPUT_FORMAT_KEY = "outputFormat";               ///< Argument key for output format
@@ -195,10 +195,10 @@ class SpdxTwoAgent extends Agent
     if ((!array_key_exists(self::OUTPUT_FORMAT_KEY, $args)
          || $args[self::OUTPUT_FORMAT_KEY] === "")
         && array_key_exists(self::UPLOAD_ADDS,$args)) {
-      $args = SpdxTwoUtils::preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
+      $args = SpdxUtils::preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
     } else {
       if (!array_key_exists(self::UPLOAD_ADDS,$args) || $args[self::UPLOAD_ADDS] === "") {
-        $args = SpdxTwoUtils::preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
+        $args = SpdxUtils::preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
       }
     }
     return $args;
@@ -258,7 +258,7 @@ class SpdxTwoAgent extends Agent
       case "spdx2tv":
         break;
       case "dep5":
-        $prefix .= "copyright-";
+        $prefix = $prefix . "copyright-";
         break;
       case "spdx3jsonld":
         break;
@@ -286,16 +286,16 @@ class SpdxTwoAgent extends Agent
       $fileName = strtoupper($this->outputFormat)."_".$packageName.'_'.time();
       switch ($this->outputFormat) {
         case "spdx2":
-          $fileName .= ".spdx.rdf";
+          $fileName = $fileName .".spdx.rdf";
           break;
         case "spdx2tv":
-          $fileName .= ".spdx";
+          $fileName = $fileName .".spdx";
           break;
         case "spdx2csv":
-          $fileName .= ".csv";
+          $fileName = $fileName .".csv";
           break;
         case "dep5":
-          $fileName .= ".txt";
+          $fileName = $fileName .".txt";
           break;
         case "spdx3jsonld":
           $fileName = $fileName .".jsonld";
@@ -393,7 +393,11 @@ class SpdxTwoAgent extends Agent
     }
     $mainLicenseString = [];
     if ($this->outputFormat == "spdx2tv" ||
-        $this->outputFormat == "spdx2csv") {
+        $this->outputFormat == "spdx2csv" ||
+        $this->outputFormat == "spdx3jsonld" ||
+        $this->outputFormat == "spdx3json" ||
+        $this->outputFormat == "spdx3rdf" ||
+        $this->outputFormat == "spdx3tv") {
       foreach ($mainLicenses as $mainLicense) {
         $shortName = $this->licensesInDocument[$mainLicense]
           ->getLicenseObj()->getShortName();
@@ -405,8 +409,8 @@ class SpdxTwoAgent extends Agent
             ->getLicenseObj()->getSpdxId();
         }
       }
-      $mainLicenseString = SpdxTwoUtils::implodeLicenses(
-        SpdxTwoUtils::removeEmptyLicenses($mainLicenseString));
+      $mainLicenseString = SpdxUtils::implodeLicenses(
+        SpdxUtils::removeEmptyLicenses($mainLicenseString));
     }
 
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
@@ -535,8 +539,8 @@ class SpdxTwoAgent extends Agent
           $licenses[] = $this->licensesInDocument[$license]
             ->getLicenseObj()->getSpdxId();
         }
-        $licenses = SpdxTwoUtils::implodeLicenses(
-          SpdxTwoUtils::removeEmptyLicenses(array_unique($licenses)));
+        $licenses = SpdxUtils::implodeLicenses(
+          SpdxUtils::removeEmptyLicenses(array_unique($licenses)));
         $this->toLicensesWithFilesAdder($licensesWithFiles,
           $licenses, $fileNode->getCopyrights(), $fileId, $fullPath);
       } else {
@@ -546,8 +550,8 @@ class SpdxTwoAgent extends Agent
             $implodedLicenses[] = $this->licensesInDocument[$license]
               ->getLicenseObj()->getSpdxId();
           }
-          $implodedLicenses = SpdxTwoUtils::implodeLicenses(
-            SpdxTwoUtils::removeEmptyLicenses(array_unique($implodedLicenses)));
+          $implodedLicenses = SpdxUtils::implodeLicenses(
+            SpdxUtils::removeEmptyLicenses(array_unique($implodedLicenses)));
           if ($fileNode->isCleared()) {
             $msgLicense = "None (scanners found: " . $implodedLicenses . ")";
           } else {
@@ -614,9 +618,9 @@ class SpdxTwoAgent extends Agent
     $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName' => $fileBase,
         'uri' => $this->uri,
+        'fileIds'=>$this->fileIds,
         'userName' => $this->container->get('dao.user')->getUserName($this->userId) . " (" . $this->container->get('dao.user')->getUserEmail($this->userId) . ")",
         'organisation' => $organizationName,
-        'fileIds'=>$this->fileIds,
         'toolVersion' => 'fossology-' . $version,
         'packageNodes' => $packageNodes,
         'packageIds' => $packageIds,
@@ -713,7 +717,11 @@ class SpdxTwoAgent extends Agent
       }
       $concludedLicensesString = [];
       if ($this->outputFormat == "spdx2tv" ||
-          $this->outputFormat == "spdx2csv") {
+          $this->outputFormat == "spdx2csv" || 
+          $this->outputFormat == "spdx3jsonld" ||
+          $this->outputFormat == "spdx3json" ||
+          $this->outputFormat == "spdx3rdf" ||
+          $this->outputFormat == "spdx3tv") {
         foreach ($fileData->getConcludedLicenses() as $license) {
           $shortName = $this->licensesInDocument[$license]
             ->getLicenseObj()->getShortName();
@@ -725,16 +733,16 @@ class SpdxTwoAgent extends Agent
               ->getLicenseObj()->getSpdxId();
           }
         }
-        $concludedLicensesString = SpdxTwoUtils::implodeLicenses(
-          SpdxTwoUtils::removeEmptyLicenses($concludedLicensesString));
+        $concludedLicensesString = SpdxUtils::implodeLicenses(
+          SpdxUtils::removeEmptyLicenses($concludedLicensesString));
       }
       if (!$stateWoInfos ||
           ($stateWoInfos && (!empty($fileData->getConcludedLicenses()) ||
               !empty($fileData->getScanners()) || !empty($fileData->getCopyrights())))) {
         $fileData->setAcknowledgements(
-          SpdxTwoUtils::cleanTextArray($fileData->getAcknowledgements()));
+          SpdxUtils::cleanTextArray($fileData->getAcknowledgements()));
         $fileData->setComments(
-          SpdxTwoUtils::cleanTextArray($fileData->getComments()));
+          SpdxUtils::cleanTextArray($fileData->getComments()));
         $dataTemplate = array(
           'fileId' => $fileId,
           'sha1' => $hashes['sha1'],
@@ -928,7 +936,7 @@ class SpdxTwoAgent extends Agent
   }
 }
 
-$agent = new SpdxTwoAgent();
+$agent = new SpdxAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
 $agent->scheduler_disconnect(0);

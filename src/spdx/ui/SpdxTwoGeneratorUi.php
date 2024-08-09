@@ -5,7 +5,7 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-namespace Fossology\SpdxTwo\UI;
+namespace Fossology\Spdx\UI;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
@@ -14,7 +14,7 @@ use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @class SpdxTwoGeneratorUi
+ * @class SpdxGeneratorUi
  * @brief Call SPDX2 agent to generate report from UI
  */
 class SpdxTwoGeneratorUi extends DefaultPlugin
@@ -161,7 +161,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     if (empty($jqCmdArgs)) {
       $jobName = $upload->getFilename();
     } else {
-      $jobName = "Multi File SPDX2";
+      $jobName = "Multi File SPDX";
     }
     $jobId = JobAddJob($userId, $groupId, $jobName, $uploadId);
     $error = "";

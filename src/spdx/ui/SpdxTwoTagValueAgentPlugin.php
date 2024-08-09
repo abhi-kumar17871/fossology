@@ -5,12 +5,12 @@
  SPDX-License-Identifier: GPL-2.0-only
 */
 
-namespace Fossology\SpdxTwo\UI;
+namespace Fossology\Spdx\UI;
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
 /**
- * @class SpdxTwoTagValueAgentPlugin
+ * @class SpdxTagValueAgentPlugin
  * @brief Add multiple uploads to SPDX2 report in Tag:Value format
  */
 class SpdxTwoTagValueAgentPlugin extends AgentPlugin
